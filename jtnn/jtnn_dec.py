@@ -181,7 +181,6 @@ class JTNNDecoder(nn.Module):
         stops = torch.ge(stop_scores, 0.5).float()
         stop_acc = torch.eq(stops, stop_targets).float()
         stop_acc = torch.sum(stop_acc) / stop_targets.nelement()
-        if 
         return pred_loss, stop_loss, pred_acc.data[0] , stop_acc.data[0] 
     
     def decode(self, mol_vec, prob_decode):
