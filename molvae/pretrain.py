@@ -34,9 +34,12 @@ latent_size = int(opts.latent_size)
 depth = int(opts.depth)
 
 model = JTNNVAE(vocab, hidden_size, latent_size, depth)
+torch.device('cuda')
+torch.cuda.init()
+
 if torch.cuda.is_available():
     print "cuda model"
-    model = model.cuda()
+    model = model
 
 for param in model.parameters():
     if param.dim() == 1:
