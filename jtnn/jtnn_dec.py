@@ -98,7 +98,7 @@ class JTNNDecoder(nn.Module):
                 cur_x.append(node_x.wid)
 
             #Clique embedding
-            cur_x = create_var(torch.LongTensor(cur_x))
+            cur_x = create_var(torch.cuda.LongTensor(cur_x))
             cur_x = self.embedding(cur_x)
 
             #Message passing
@@ -123,7 +123,7 @@ class JTNNDecoder(nn.Module):
                 stop_target.append(direction)
 
             #Hidden states for stop prediction
-            cur_batch = create_var(torch.LongTensor(batch_list))
+            cur_batch = create_var(torch.cuda.LongTensor(batch_list))
             cur_mol_vec = mol_vec.index_select(0, cur_batch)
             stop_hidden = torch.cat([cur_x,cur_o,cur_mol_vec], dim=1)
             stop_hiddens.append( stop_hidden )
@@ -132,10 +132,10 @@ class JTNNDecoder(nn.Module):
             #Hidden states for clique prediction
             if len(pred_list) > 0:
                 batch_list = [batch_list[i] for i in pred_list]
-                cur_batch = create_var(torch.LongTensor(batch_list))
+                cur_batch = create_var(torch.cuda.LongTensor(batch_list))
                 pred_mol_vecs.append( mol_vec.index_select(0, cur_batch) )
 
-                cur_pred = create_var(torch.LongTensor(pred_list))
+                cur_pred = create_var(torch.cuda.LongTensor(pred_list))
                 pred_hiddens.append( new_h.index_select(0, cur_pred) )
                 pred_targets.extend( pred_target )
 
@@ -149,7 +149,7 @@ class JTNNDecoder(nn.Module):
             cur_o_nei.extend(cur_nei)
             cur_o_nei.extend([padding] * pad_len)
 
-        cur_x = create_var(torch.LongTensor(cur_x))
+        cur_x = create_var(torch.cuda.LongTensor(cur_x))
         cur_x = self.embedding(cur_x)
         cur_o_nei = torch.stack(cur_o_nei, dim=0).view(-1,MAX_NB,self.hidden_size)
         cur_o = cur_o_nei.sum(dim=1)
@@ -164,7 +164,7 @@ class JTNNDecoder(nn.Module):
         pred_vecs = torch.cat([pred_hiddens, pred_mol_vecs], dim=1)
         pred_vecs = nn.ReLU()(self.W(pred_vecs))
         pred_scores = self.W_o(pred_vecs)
-        pred_targets = create_var(torch.LongTensor(pred_targets))
+        pred_targets = create_var(torch.cuda.LongTensor(pred_targets))
 
         pred_loss = self.pred_loss(pred_scores, pred_targets) / len(mol_batch)
         _,preds = torch.max(pred_scores, dim=1)
@@ -211,7 +211,7 @@ class JTNNDecoder(nn.Module):
             else:
                 cur_h_nei = zero_pad
 
-            cur_x = create_var(torch.LongTensor([node_x.wid]))
+            cur_x = create_var(torch.cuda.LongTensor([node_x.wid]))
             cur_x = self.embedding(cur_x)
 
             #Predict stop

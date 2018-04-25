@@ -105,7 +105,7 @@ class JTNNVAE(nn.Module):
         cand_vec = self.jtmpn(cands, tree_mess)
         cand_vec = self.G_mean(cand_vec)
 
-        batch_idx = create_var(torch.LongTensor(batch_idx))
+        batch_idx = create_var(torch.cuda.LongTensor(batch_idx))
         mol_vec = mol_vec.index_select(0, batch_idx)
 
         mol_vec = mol_vec.view(-1, 1, self.latent_size / 2)
@@ -126,13 +126,13 @@ class JTNNVAE(nn.Module):
                 if cur_score.data[label] >= cur_score.max().item():
                     acc += 1
 
-                label = create_var(torch.LongTensor([label]))
+                label = create_var(torch.cuda.LongTensor([label]))
                 all_loss.append( self.assm_loss(cur_score.view(1,-1), label) )
         a=0.0
         for i in all_loss:
             a+=i.item()
         al_loss = a / len(mol_batch)
-        all_loss = torch.tensor([al_loss])
+        all_loss = torch.tensor([al_loss]).cuda()
         #all_loss = torch.cat(all_loss.item, 1).sum() / len(mol_batch)
         return all_loss, acc * 1.0 / cnt
 
@@ -153,7 +153,7 @@ class JTNNVAE(nn.Module):
             print "no label generate fake return"
             return [torch.tensor([0]).cuda(), 1]
 
-        batch_idx = create_var(torch.LongTensor(batch_idx))
+        batch_idx = create_var(torch.cuda.LongTensor(batch_idx))
         stereo_cands = self.mpn(mol2graph(stereo_cands))
         stereo_cands = self.G_mean(stereo_cands)
         stereo_labels = mol_vec.index_select(0, batch_idx)
@@ -165,14 +165,14 @@ class JTNNVAE(nn.Module):
             cur_scores = scores.narrow(0, st, le)
             if cur_scores.data[label] >= cur_scores.max().item(): 
                 acc += 1
-            label = create_var(torch.LongTensor([label]))
+            label = create_var(torch.cuda.LongTensor([label]))
             all_loss.append( self.stereo_loss(cur_scores.view(1,-1), label) )
             st += le
         a=0.0
         for i in all_loss:
             a+=i.item()
         al_loss = a / len(labels)
-        all_loss = torch.tensor([al_loss])
+        all_loss = torch.tensor([al_loss]).cuda()
         #all_loss = torch.cat(all_loss).sum() / len(labels)
         return all_loss, acc * 1.0 / len(labels)
 

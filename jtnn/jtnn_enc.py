@@ -57,7 +57,7 @@ class JTNNEncoder(nn.Module):
                 h_nei.extend([padding] * pad_len)
                 cur_h_nei.extend(h_nei)
 
-            cur_x = create_var(torch.LongTensor(cur_x))
+            cur_x = create_var(torch.cuda.LongTensor(cur_x).cuda())
             cur_x = self.embedding(cur_x)
             cur_h_nei = torch.cat(cur_h_nei, dim=0).view(-1,MAX_NB,self.hidden_size)
 
@@ -109,7 +109,7 @@ def node_aggregate(nodes, h, embedding, W):
     
     h_nei = torch.cat(h_nei, dim=0).view(-1,MAX_NB,hidden_size)
     sum_h_nei = h_nei.sum(dim=1)
-    x_vec = create_var(torch.LongTensor(x_idx))
+    x_vec = create_var(torch.cuda.LongTensor(x_idx))
     x_vec = embedding(x_vec)
     node_vec = torch.cat([x_vec, sum_h_nei], dim=1)
     return nn.ReLU()(W(node_vec))

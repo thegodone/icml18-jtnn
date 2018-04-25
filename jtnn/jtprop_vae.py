@@ -113,7 +113,7 @@ class JTPropVAE(nn.Module):
         cand_vec = self.jtmpn(cands, tree_mess)
         cand_vec = self.G_mean(cand_vec)
 
-        batch_idx = create_var(torch.LongTensor(batch_idx))
+        batch_idx = create_var(torch.cuda.(batch_idx))
         mol_vec = mol_vec.index_select(0, batch_idx)
 
         mol_vec = mol_vec.view(-1, 1, self.latent_size / 2)
@@ -134,7 +134,7 @@ class JTPropVAE(nn.Module):
                 if cur_score.data[label] >= cur_score.max().item():
                     acc += 1
 
-                label = create_var(torch.LongTensor([label]))
+                label = create_var(torch.cuda.LongTensor([label]))
                 all_loss.append( self.assm_loss(cur_score.view(1,-1), label) )
         
         all_loss = torch.cat(all_loss).sum() / len(mol_batch)
@@ -155,7 +155,7 @@ class JTPropVAE(nn.Module):
         if len(labels) == 0: 
             return create_var(torch.Tensor(0)), 1.0
 
-        batch_idx = create_var(torch.LongTensor(batch_idx))
+        batch_idx = create_var(torch.cuda.LongTensor(batch_idx))
         stereo_cands = self.mpn(mol2graph(stereo_cands))
         stereo_cands = self.G_mean(stereo_cands)
         stereo_labels = mol_vec.index_select(0, batch_idx)
@@ -167,7 +167,7 @@ class JTPropVAE(nn.Module):
             cur_scores = scores.narrow(0, st, le)
             if cur_scores.data[label] >= cur_scores.max().item(): 
                 acc += 1
-            label = create_var(torch.LongTensor([label]))
+            label = create_var(torch.cuda.LongTensor([label]))
             all_loss.append( self.stereo_loss(cur_scores.view(1,-1), label) )
             st += le
         all_loss = torch.cat(all_loss).sum() / len(labels)
