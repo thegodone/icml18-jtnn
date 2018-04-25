@@ -32,7 +32,8 @@ depth = int(opts.depth)
 
 model = JTNNVAE(vocab, hidden_size, latent_size, depth)
 model.load_state_dict(torch.load(opts.model_path))
-model = model.cuda()
+if torch.cuda.is_available():
+    model = model.cuda()
 
 data = []
 with open(opts.test_path) as f:

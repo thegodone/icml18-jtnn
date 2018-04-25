@@ -38,11 +38,11 @@ model = JTPropVAE(vocab, hidden_size, latent_size, depth)
 
 for param in model.parameters():
     if param.dim() == 1:
-        nn.init.constant(param, 0)
+        nn.init.constant_(param, 0)
     else:
-        nn.init.xavier_normal(param)
-
-model = model.cuda()
+        nn.init.xavier_normal_(param)
+if torch.cuda.is_available():
+    model = model.cuda()
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
@@ -56,6 +56,8 @@ MAX_EPOCH = 3
 PRINT_ITER = 20
 
 for epoch in xrange(MAX_EPOCH):
+    print "start training"
+    sys.stdout.flush()
     word_acc,topo_acc,assm_acc,steo_acc,prop_acc = 0,0,0,0,0
 
     for it, batch in enumerate(dataloader):
@@ -66,6 +68,8 @@ for epoch in xrange(MAX_EPOCH):
                     node.cand_mols.append(node.label_mol)
 
         model.zero_grad()
+        print "ici"
+        sys.stdout.flush()
         loss, kl_div, wacc, tacc, sacc, dacc, pacc = model(batch, beta=0)
         loss.backward()
         optimizer.step()

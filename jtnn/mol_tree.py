@@ -1,6 +1,7 @@
 import rdkit
 import rdkit.Chem as Chem
 import copy
+import time
 from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
 
 def get_slots(smiles):
@@ -126,17 +127,43 @@ class MolTree(object):
         for node in self.nodes:
             node.assemble()
 
-if __name__ == "__main__":
-    import sys
-    lg = rdkit.RDLogger.logger() 
-    lg.setLevel(rdkit.RDLogger.CRITICAL)
 
+def myfunc(matrix, smiles):
+    mol = MolTree(smiles)
+    for c in mol.nodes:
+        matrix.append(c.smiles)
+
+
+if __name__ == "__main__":
+    import multiprocessing
+    from multiprocessing import Manager
+    from itertools import product
+    from functools import partial
+    import sys
+    i=0
+    S=[]
     cset = set()
+    n=100000
+    t0=time.clock()
     for line in sys.stdin:
+        i+=1
         smiles = line.split()[0]
-        mol = MolTree(smiles)
-        for c in mol.nodes:
-            cset.add(c.smiles)
-    for x in cset:
-        print x
+        S.append(smiles)
+        if i>n:
+            print i
+            break
+    manager = Manager()
+    matrix = manager.list()
+    pool = multiprocessing.Pool(processes=7)
+    pool.map(partial(myfunc, matrix), S)
+    t00=time.clock()
+    print t00-t0
+    t=time.clock()
+    R=list(set(matrix))
+    t2=time.clock()
+    print t2-t
+    print(R)
+    print(len(R))
+
+
 
