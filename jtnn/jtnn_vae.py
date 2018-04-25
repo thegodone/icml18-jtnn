@@ -129,8 +129,11 @@ class JTNNVAE(nn.Module):
 
                 label = create_var(torch.LongTensor([label]))
                 all_loss.append( self.assm_loss(cur_score.view(1,-1), label) )
-        print all_loss
-        all_loss = torch.cat(all_loss.item, 1).sum() / len(mol_batch)
+        a=0.0
+        for i in all_loss:
+            a+=i.item()
+        all_loss = a / len(mol_batch)
+        #all_loss = torch.cat(all_loss.item, 1).sum() / len(mol_batch)
         return all_loss, acc * 1.0 / cnt
 
     def stereo(self, mol_batch, mol_vec):
