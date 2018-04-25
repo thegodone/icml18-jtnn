@@ -133,7 +133,7 @@ class JTNNVAE(nn.Module):
         for i in all_loss:
             a+=i.item()
         al_loss = a / len(mol_batch)
-        all_loss = torch.Tensor(al_loss)
+        all_loss = torch.Tensor([al_loss])
         #all_loss = torch.cat(all_loss.item, 1).sum() / len(mol_batch)
         return all_loss, acc * 1.0 / cnt
 
@@ -171,7 +171,7 @@ class JTNNVAE(nn.Module):
         for i in all_loss:
             a+=i.item()
         al_loss = a / len(labels)
-        all_loss = torch.Tensor(al_loss)
+        all_loss = torch.Tensor([al_loss])
         #all_loss = torch.cat(all_loss).sum() / len(labels)
         return all_loss, acc * 1.0 / len(labels)
 
