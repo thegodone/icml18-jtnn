@@ -39,7 +39,7 @@ torch.cuda.init()
 
 if torch.cuda.is_available():
     print "cuda model"
-    model = model
+    model = model.cuda()
 
 for param in model.parameters():
     if param.dim() == 1:
