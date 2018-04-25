@@ -34,7 +34,7 @@ latent_size = int(opts.latent_size)
 depth = int(opts.depth)
 
 model = JTNNVAE(vocab, hidden_size, latent_size, depth)
-
+model = model.cuda()
 for param in model.parameters():
     if param.dim() == 1:
         nn.init.constant_(param, 0)
