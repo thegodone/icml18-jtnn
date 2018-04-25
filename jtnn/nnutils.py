@@ -3,14 +3,13 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 device = torch.device("cuda:0")
-print device
 
 
 def create_var(tensor, requires_grad=None):
     if requires_grad is None:
-        return Variable(tensor)
+        return Variable(tensor).cuda()
     else:
-        return Variable(tensor, requires_grad=requires_grad)
+        return Variable(tensor, requires_grad=requires_grad).cuda()
 
 def index_select_ND(source, dim, index):
     index_size = index.size()
