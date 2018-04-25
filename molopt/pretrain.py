@@ -37,12 +37,14 @@ latent_size = int(opts.latent_size)
 depth = int(opts.depth)
 
 model = JTPropVAE(vocab, hidden_size, latent_size, depth).to(device)
+if torch.cuda.is_available():
+    model = model.cuda()
 
 for param in model.parameters():
     if param.dim() == 1:
-        nn.init.constant_(param, 0)
+        nn.init.constant(param, 0)
     else:
-        nn.init.xavier_normal_(param)
+        nn.init.xavier_normal(param)
 
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)
 

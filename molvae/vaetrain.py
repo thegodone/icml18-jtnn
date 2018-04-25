@@ -47,9 +47,9 @@ if opts.model_path is not None:
 else:
     for param in model.parameters():
         if param.dim() == 1:
-            nn.init.constant_(param, 0)
+            nn.init.constant(param, 0)
         else:
-            nn.init.xavier_normal_(param)
+            nn.init.xavier_normal(param)
 if torch.cuda.is_available():
     model = model.cuda()
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)
