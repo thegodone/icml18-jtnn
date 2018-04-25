@@ -91,7 +91,7 @@ class JTNNVAE(nn.Module):
         all_vec = torch.cat([tree_vec, mol_vec], dim=1)
         loss = word_loss + topo_loss + assm_loss + 2 * stereo_loss + beta * kl_loss 
 
-        return loss, kl_loss.item(), word_acc, topo_acc, assm_acc, stereo_acc
+        return loss, kl_loss.data[0] , word_acc, topo_acc, assm_acc, stereo_acc
 
     def assm(self, mol_batch, mol_vec, tree_mess):
         cands = []
@@ -124,14 +124,14 @@ class JTNNVAE(nn.Module):
                 cur_score = scores.narrow(0, tot, ncand)
                 tot += ncand
 
-                if cur_score.data[label] >= cur_score.max().item():
+                if cur_score.data[label] >= cur_score.max().data[0] :
                     acc += 1
 
                 label = create_var(torch.LongTensor([label]))
                 all_loss.append( self.assm_loss(cur_score.view(1,-1), label) )
         a=0.0
         for i in all_loss:
-            a+=i.item()
+            a+=i.data[0] 
         al_loss = a / len(mol_batch)
         all_loss = torch.Tensor([al_loss])
         #all_loss = torch.cat(all_loss.item, 1).sum() / len(mol_batch)
