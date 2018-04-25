@@ -151,7 +151,7 @@ class JTNNVAE(nn.Module):
         if len(labels) == 0: 
             #return torch.Tensor([0, 1])
             print "no label generate fake return"
-            return torch.tensor([0 ,1 ]).cuda()
+            return torch.tensor([0.0 ,1.0]).cuda()
 
         batch_idx = create_var(torch.cuda.LongTensor(batch_idx))
         stereo_cands = self.mpn(mol2graph(stereo_cands))
