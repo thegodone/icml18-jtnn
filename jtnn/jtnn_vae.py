@@ -1,5 +1,4 @@
 import torch
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 import torch.nn as nn
 from mol_tree import Vocab, MolTree
 from nnutils import create_var
@@ -150,7 +149,9 @@ class JTNNVAE(nn.Module):
             labels.append( (cands.index(mol_tree.smiles3D), len(cands)) )
 
         if len(labels) == 0: 
-            return torch.Tensor([0, 1])
+            #return torch.Tensor([0, 1])
+            print "no label generate fake return"
+            return [torch.tensor([0]), 1]
 
         batch_idx = create_var(torch.LongTensor(batch_idx))
         stereo_cands = self.mpn(mol2graph(stereo_cands))

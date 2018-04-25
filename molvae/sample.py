@@ -39,6 +39,7 @@ missing = {k: v for k, v in model.state_dict().items() if k not in load_dict}
 load_dict.update(missing) 
 model.load_state_dict(load_dict)
 if torch.cuda.is_available():
+    print "cuda model"
     model = model.cuda()
 
 torch.manual_seed(0)

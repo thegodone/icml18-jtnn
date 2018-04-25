@@ -50,8 +50,12 @@ else:
             nn.init.constant_(param, 0)
         else:
             nn.init.xavier_normal_(param)
+
 if torch.cuda.is_available():
+    print "cuda model"
     model = model.cuda()
+
+
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)
 
 optimizer = optim.Adam(model.parameters(), lr=lr)

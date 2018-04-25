@@ -37,6 +37,8 @@ sim_cutoff = float(opts.cutoff)
 model = JTPropVAE(vocab, hidden_size, latent_size, depth)
 if torch.cuda.is_available():
     model.load_state_dict(torch.load(opts.model_path))
+    print "cuda model"
+
     model = model.cuda()
 else:
     model.load_state_dict(torch.load(opts.model_path, map_location='cpu'))
