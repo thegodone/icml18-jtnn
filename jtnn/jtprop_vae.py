@@ -113,7 +113,7 @@ class JTPropVAE(nn.Module):
         cand_vec = self.jtmpn(cands, tree_mess)
         cand_vec = self.G_mean(cand_vec)
 
-        batch_idx = create_var(torch.cuda.(batch_idx))
+        batch_idx = create_var(torch.cuda.LongTensor(batch_idx))
         mol_vec = mol_vec.index_select(0, batch_idx)
 
         mol_vec = mol_vec.view(-1, 1, self.latent_size / 2)
