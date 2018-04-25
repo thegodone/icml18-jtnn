@@ -1,5 +1,4 @@
 import torch
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 import torch.nn as nn
 from mol_tree import Vocab, MolTree
 from nnutils import create_var
@@ -130,7 +129,7 @@ class JTNNVAE(nn.Module):
                 label = create_var(torch.LongTensor([label]))
                 all_loss.append( self.assm_loss(cur_score.view(1,-1), label) )
         print all_loss
-        all_loss = torch.cat(all_loss).sum() / len(mol_batch)
+        all_loss = torch.sum(all_loss) / len(mol_batch)
         return all_loss, acc * 1.0 / cnt
 
     def stereo(self, mol_batch, mol_vec):
