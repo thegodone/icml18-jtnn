@@ -54,11 +54,16 @@ MAX_EPOCH = 3
 PRINT_ITER = 20
 
 for epoch in xrange(MAX_EPOCH):
+    print "new epoch:", epoch
+    sys.stdout.flush()
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=4, collate_fn=lambda x:x, drop_last=True)
 
     word_acc,topo_acc,assm_acc,steo_acc = 0,0,0,0
 
     for it, batch in enumerate(dataloader):
+        print "batchid:",it
+        sys.stdout.flush()
+
         for mol_tree in batch:
             for node in mol_tree.nodes:
                 if node.label not in node.cands:
