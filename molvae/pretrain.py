@@ -33,15 +33,15 @@ hidden_size = int(opts.hidden_size)
 latent_size = int(opts.latent_size)
 depth = int(opts.depth)
 
-model = JTNNVAE(vocab, hidden_size, latent_size, depth)
+model = JTNNVAE(vocab, hidden_size, latent_size, depth).to(device)
 
 for param in model.parameters():
     if param.dim() == 1:
         nn.init.constant_(param, 0)
     else:
         nn.init.xavier_normal_(param)
-if torch.cuda.is_available():
-    model = model.cuda()
+
+
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)

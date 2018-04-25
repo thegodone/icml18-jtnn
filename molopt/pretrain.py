@@ -29,6 +29,7 @@ opts,args = parser.parse_args()
 vocab = [x.strip("\r\n ") for x in open(opts.vocab_path)] 
 vocab = Vocab(vocab)
 device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+print device
 
 batch_size = int(opts.batch_size)
 hidden_size = int(opts.hidden_size)

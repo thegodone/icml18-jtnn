@@ -39,7 +39,7 @@ depth = int(opts.depth)
 beta = float(opts.beta)
 lr = float(opts.lr)
 
-model = JTPropVAE(vocab, hidden_size, latent_size, depth)
+model = JTPropVAE(vocab, hidden_size, latent_size, depth).to(device)
 
 if opts.model_path is not None:
     model.load_state_dict(torch.load(opts.model_path))
