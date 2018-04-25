@@ -33,7 +33,7 @@ hidden_size = int(opts.hidden_size)
 latent_size = int(opts.latent_size)
 depth = int(opts.depth)
 
-model = JTNNVAE(vocab, hidden_size, latent_size, depth).to(device)
+model = JTNNVAE(vocab, hidden_size, latent_size, depth)
 
 for param in model.parameters():
     if param.dim() == 1:
