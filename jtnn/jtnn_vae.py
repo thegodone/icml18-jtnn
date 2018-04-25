@@ -166,7 +166,11 @@ class JTNNVAE(nn.Module):
             label = create_var(torch.LongTensor([label]))
             all_loss.append( self.stereo_loss(cur_scores.view(1,-1), label) )
             st += le
-        all_loss = torch.cat(all_loss).sum() / len(labels)
+        a=0.0
+        for i in all_loss:
+            a+=i.item()
+        all_loss = a / len(labels)
+        #all_loss = torch.cat(all_loss).sum() / len(labels)
         return all_loss, acc * 1.0 / len(labels)
 
     def reconstruct(self, smiles, prob_decode=False):
