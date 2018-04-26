@@ -92,9 +92,6 @@ for epoch in xrange(MAX_EPOCH):
             word_acc,topo_acc,assm_acc,steo_acc = 0,0,0,0
             sys.stdout.flush()
             scheduler.step()
-            print "learning rate: %.6f" % scheduler.get_lr()[0]
-            print opts.save_path +"model.iter-" + str(epoch)+"-"+str(it)+".pth"
-            torch.save(model.state_dict(), opts.save_path +"model.iter-" + str(epoch)+"-"+str(it)+".pth")
     scheduler.step()
     print "learning rate: %.6f" % scheduler.get_lr()[0]
     torch.save(model.state_dict(), opts.save_path + "/model.iter-" + str(epoch))
