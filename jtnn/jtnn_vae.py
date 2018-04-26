@@ -149,8 +149,6 @@ class JTNNVAE(nn.Module):
             labels.append( (cands.index(mol_tree.smiles3D), len(cands)) )
 
         if len(labels) == 0: 
-            #return torch.Tensor([0, 1])
-            print "no label generate fake return"
             return torch.tensor([0.0 ,1.0]).cuda()
 
         batch_idx = create_var(torch.cuda.LongTensor(batch_idx))
