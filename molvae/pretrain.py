@@ -94,7 +94,8 @@ for epoch in xrange(MAX_EPOCH):
             scheduler.step()
             print "learning rate: %.6f" % scheduler.get_lr()[0]
             print opts.save_path
-            torch.save(model.state_dict(), opts.save_path + "model.iter-" + str(epoch)+"-"+str(it))
+            print "./model.iter-" + str(epoch)+"-"+str(it)+".pth"
+            torch.save(model.state_dict(), "./model.iter-" + str(epoch)+"-"+str(it)+".pth")
     scheduler.step()
     print "learning rate: %.6f" % scheduler.get_lr()[0]
     torch.save(model.state_dict(), opts.save_path + "/model.iter-" + str(epoch))
