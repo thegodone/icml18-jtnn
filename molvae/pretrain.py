@@ -38,7 +38,6 @@ torch.device('cuda')
 torch.cuda.init()
 
 if torch.cuda.is_available():
-    print "cuda model"
     model = model.cuda()
 
 for param in model.parameters():
@@ -67,9 +66,6 @@ for epoch in xrange(MAX_EPOCH):
     word_acc,topo_acc,assm_acc,steo_acc = 0,0,0,0
 
     for it, batch in enumerate(dataloader):
-        print "batchid:",it
-        sys.stdout.flush()
-
         for mol_tree in batch:
             for node in mol_tree.nodes:
                 if node.label not in node.cands:
@@ -95,7 +91,9 @@ for epoch in xrange(MAX_EPOCH):
             print "KL: %.1f, Word: %.2f, Topo: %.2f, Assm: %.2f, Steo: %.2f" % (kl_div, word_acc, topo_acc, assm_acc, steo_acc)
             word_acc,topo_acc,assm_acc,steo_acc = 0,0,0,0
             sys.stdout.flush()
-
+            scheduler.step()
+            print "learning rate: %.6f" % scheduler.get_lr()[0]
+            torch.save(model.state_dict(), opts.save_path + "model.iter-" + str(epoch)+"-"+str(it))
     scheduler.step()
     print "learning rate: %.6f" % scheduler.get_lr()[0]
     torch.save(model.state_dict(), opts.save_path + "/model.iter-" + str(epoch))
