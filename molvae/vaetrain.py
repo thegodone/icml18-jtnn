@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
+#from torch.autograd import Variable
 
 import math, random, sys
 from optparse import OptionParser
@@ -53,7 +53,7 @@ else:
 
 if torch.cuda.is_available():
     print "cuda model"
-    model = model.cuda()
+    model = model.to('cpu')
 
 
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)

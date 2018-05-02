@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
+#from torch.autograd import Variable
 from optparse import OptionParser
 
 import rdkit
@@ -41,7 +41,7 @@ depth = int(opts.depth)
 model = JTNNVAE(vocab, hidden_size, latent_size, depth)
 model.load_state_dict(torch.load(opts.model_path))
 if torch.cuda.is_available():
-    model = model.cuda()
+    model = model.to('cpu')
 
 smiles_rdkit = []
 for i in xrange(len(smiles)):

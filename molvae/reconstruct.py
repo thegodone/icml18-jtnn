@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
+#from torch.autograd import Variable
 
 import math, random, sys
 from optparse import OptionParser
@@ -35,7 +35,7 @@ model.load_state_dict(torch.load(opts.model_path))
 
 if torch.cuda.is_available():
     print "cuda model"
-    model = model.cuda()
+    model = model.to('cpu')
 
 data = []
 with open(opts.test_path) as f:

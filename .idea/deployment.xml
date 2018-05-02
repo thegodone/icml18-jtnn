@@ -5,7 +5,7 @@
       <paths name="gva6247">
         <serverdata>
           <mappings>
-            <mapping deploy="/PyCharm/Testing" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/raid/home/tgg/PyCharm/Testing" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

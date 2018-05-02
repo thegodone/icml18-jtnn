@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
-from nnutils import create_var, index_select_ND
+#from nnutils import create_var, index_select_ND
+from nnutils import index_select_ND
+
 from chemutils import get_mol
 #from mpn import atom_features, bond_features, ATOM_FDIM, BOND_FDIM
 import rdkit.Chem as Chem
@@ -28,10 +30,11 @@ def bond_features(bond):
 
 class JTMPN(nn.Module):
 
-    def __init__(self, hidden_size, depth):
+    def __init__(self, hidden_size, depth, device):
         super(JTMPN, self).__init__()
         self.hidden_size = hidden_size
         self.depth = depth
+        self.device = device
 
         self.W_i = nn.Linear(ATOM_FDIM + BOND_FDIM, hidden_size, bias=False)
         self.W_h = nn.Linear(hidden_size, hidden_size, bias=False)
@@ -40,7 +43,7 @@ class JTMPN(nn.Module):
     def forward(self, cand_batch, tree_mess):
         fatoms,fbonds = [],[] 
         in_bonds,all_bonds = [],[] 
-        mess_dict,all_mess = {},[create_var(torch.zeros(self.hidden_size))] #Ensure index 0 is vec(0)
+        mess_dict,all_mess = {},[torch.zeros(self.hidden_size).to(self.device)] #Ensure index 0 is vec(0)
         total_atoms = 0
         scope = []
 
@@ -107,10 +110,10 @@ class JTMPN(nn.Module):
                 if b2 < total_mess or all_bonds[b2-total_mess][0] != y:
                     bgraph[b1,i] = b2
 
-        fatoms = create_var(fatoms)
-        fbonds = create_var(fbonds)
-        agraph = create_var(agraph)
-        bgraph = create_var(bgraph)
+        fatoms = fatoms.to(self.device)
+        fbonds = fbonds.to(self.device)
+        agraph = agraph.to(self.device)
+        bgraph = bgraph.to(self.device)
 
         binput = self.W_i(fbonds)
         graph_message = nn.ReLU()(binput)

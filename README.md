@@ -23,3 +23,9 @@ This repository contains the following directories:
 
 # Contact
 Wengong Jin (wengong@csail.mit.edu)
+
+# addind test script to test multiples cases:
+sample
+reconstruct
+pretrain-vae
+train-vae

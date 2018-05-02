@@ -11,8 +11,8 @@ from rdkit.Chem import Descriptors
 
 import torch
 import torch.nn as nn
-from jtnn import create_var, JTNNVAE, Vocab
-
+#from jtnn import create_var, JTNNVAE, Vocab
+from jtnn import  JTNNVAE, Vocab
 from optparse import OptionParser
 
 lg = rdkit.RDLogger.logger() 
@@ -51,7 +51,7 @@ random_seed = int(opts.random_seed)
 model = JTNNVAE(vocab, hidden_size, latent_size, depth)
 model.load_state_dict(torch.load(opts.model_path))
 if torch.cuda.is_available():
-    model = model.cuda()
+    model = model.to('cpu')
 
 # We load the random seed
 np.random.seed(random_seed)
@@ -106,8 +106,8 @@ while iteration < 5:
     for i in xrange(60):
         all_vec = next_inputs[i].reshape((1,-1))
         tree_vec,mol_vec = np.hsplit(all_vec, 2)
-        tree_vec = create_var(torch.from_numpy(tree_vec).float())
-        mol_vec = create_var(torch.from_numpy(mol_vec).float())
+        tree_vec = torch.from_numpy(tree_vec).to('cpu') # not copy the data ...
+        mol_vec = torch.from_numpy(mol_vec).to('cpu')
         s = model.decode(tree_vec, mol_vec, prob_decode=False)
         if s is not None: 
             valid_smiles.append(s)

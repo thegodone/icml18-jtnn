@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from mol_tree import Vocab, MolTree, MolTreeNode
-from nnutils import create_var, GRU
+#from nnutils import create_var, GRU
+from nnutils import GRU
 from chemutils import enum_assemble
 import copy
 
@@ -10,11 +11,12 @@ MAX_DECODE_LEN = 100
 
 class JTNNDecoder(nn.Module):
 
-    def __init__(self, vocab, hidden_size, latent_size, embedding=None):
+    def __init__(self, vocab, hidden_size, latent_size, device, embedding=None):
         super(JTNNDecoder, self).__init__()
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
+        self.device = device
 
         if embedding is None:
             self.embedding = nn.Embedding(self.vocab_size, hidden_size)
@@ -62,12 +64,12 @@ class JTNNDecoder(nn.Module):
                 node.neighbors = []
 
         #Predict Root
-        pred_hiddens.append(create_var(torch.zeros(len(mol_batch),self.hidden_size)))
+        pred_hiddens.append(torch.zeros(len(mol_batch),self.hidden_size).to(self.device))
         pred_targets.extend([mol_tree.nodes[0].wid for mol_tree in mol_batch])
         pred_mol_vecs.append(mol_vec) 
 
         max_iter = max([len(tr) for tr in traces])
-        padding = create_var(torch.zeros(self.hidden_size), False)
+        padding = torch.zeros(self.hidden_size).to(self.device)
         h = {}
 
         for t in xrange(max_iter):
@@ -98,12 +100,12 @@ class JTNNDecoder(nn.Module):
                 cur_x.append(node_x.wid)
 
             #Clique embedding
-            cur_x = create_var(torch.cuda.LongTensor(cur_x))
+            cur_x = torch.tensor(cur_x,dtype=torch.long).to(self.device)
             cur_x = self.embedding(cur_x)
 
             #Message passing
             cur_h_nei = torch.stack(cur_h_nei, dim=0).view(-1,MAX_NB,self.hidden_size)
-            new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+            new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h, self.device)
 
             #Node Aggregate
             cur_o_nei = torch.stack(cur_o_nei, dim=0).view(-1,MAX_NB,self.hidden_size)
@@ -123,7 +125,7 @@ class JTNNDecoder(nn.Module):
                 stop_target.append(direction)
 
             #Hidden states for stop prediction
-            cur_batch = create_var(torch.cuda.LongTensor(batch_list))
+            cur_batch = torch.tensor(batch_list,dtype=torch.long).to(self.device)
             cur_mol_vec = mol_vec.index_select(0, cur_batch)
             stop_hidden = torch.cat([cur_x,cur_o,cur_mol_vec], dim=1)
             stop_hiddens.append( stop_hidden )
@@ -132,10 +134,10 @@ class JTNNDecoder(nn.Module):
             #Hidden states for clique prediction
             if len(pred_list) > 0:
                 batch_list = [batch_list[i] for i in pred_list]
-                cur_batch = create_var(torch.cuda.LongTensor(batch_list))
+                cur_batch = torch.tensor(batch_list,dtype=torch.long).to(self.device)
                 pred_mol_vecs.append( mol_vec.index_select(0, cur_batch) )
 
-                cur_pred = create_var(torch.cuda.LongTensor(pred_list))
+                cur_pred = torch.tensor(pred_list,dtype=torch.long).to(self.device)
                 pred_hiddens.append( new_h.index_select(0, cur_pred) )
                 pred_targets.extend( pred_target )
 
@@ -149,7 +151,7 @@ class JTNNDecoder(nn.Module):
             cur_o_nei.extend(cur_nei)
             cur_o_nei.extend([padding] * pad_len)
 
-        cur_x = create_var(torch.cuda.LongTensor(cur_x))
+        cur_x = torch.tensor(cur_x,dtype=torch.long).to(self.device)
         cur_x = self.embedding(cur_x)
         cur_o_nei = torch.stack(cur_o_nei, dim=0).view(-1,MAX_NB,self.hidden_size)
         cur_o = cur_o_nei.sum(dim=1)
@@ -164,7 +166,7 @@ class JTNNDecoder(nn.Module):
         pred_vecs = torch.cat([pred_hiddens, pred_mol_vecs], dim=1)
         pred_vecs = nn.ReLU()(self.W(pred_vecs))
         pred_scores = self.W_o(pred_vecs)
-        pred_targets = create_var(torch.cuda.LongTensor(pred_targets))
+        pred_targets = torch.tensor(pred_targets,dtype=torch.long).to(self.device)
 
         pred_loss = self.pred_loss(pred_scores, pred_targets) / len(mol_batch)
         _,preds = torch.max(pred_scores, dim=1)
@@ -175,7 +177,7 @@ class JTNNDecoder(nn.Module):
         stop_hiddens = torch.cat(stop_hiddens, dim=0)
         stop_vecs = nn.ReLU()(self.U(stop_hiddens))
         stop_scores = self.U_s(stop_vecs).squeeze()
-        stop_targets = create_var(torch.Tensor(stop_targets))
+        stop_targets = torch.Tensor(stop_targets).to(self.device)
         
         stop_loss = self.stop_loss(stop_scores, stop_targets) / len(mol_batch)
         stops = torch.ge(stop_scores, 0.5).float()
@@ -186,8 +188,8 @@ class JTNNDecoder(nn.Module):
     
     def decode(self, mol_vec, prob_decode):
         stack,trace = [],[]
-        init_hidden = create_var(torch.zeros(1,self.hidden_size))
-        zero_pad = create_var(torch.zeros(1,1,self.hidden_size))
+        init_hidden = torch.zeros(1,self.hidden_size).to(self.device)
+        zero_pad = torch.zeros(1,1,self.hidden_size).to(self.device)
 
         #Root Prediction
         root_hidden = torch.cat([init_hidden, mol_vec], dim=1)
@@ -211,7 +213,7 @@ class JTNNDecoder(nn.Module):
             else:
                 cur_h_nei = zero_pad
 
-            cur_x = create_var(torch.cuda.LongTensor([node_x.wid]))
+            cur_x = torch.tensor([node_x.wid],dtype=torch.long).to(self.device)
             cur_x = self.embedding(cur_x)
 
             #Predict stop
@@ -226,7 +228,7 @@ class JTNNDecoder(nn.Module):
                 backtrack = (stop_score.item()  < 0.5)
 
             if not backtrack: #Forward: Predict next clique
-                new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+                new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h, self.device)
                 pred_hidden = torch.cat([new_h,mol_vec], dim=1)
                 pred_hidden = nn.ReLU()(self.W(pred_hidden))
                 pred_score = nn.Softmax()(self.W_o(pred_hidden) * 20)
@@ -267,7 +269,7 @@ class JTNNDecoder(nn.Module):
                 else:
                     cur_h_nei = zero_pad
 
-                new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h)
+                new_h = GRU(cur_x, cur_h_nei, self.W_z, self.W_r, self.U_r, self.W_h, self.device)
                 h[(node_x.idx,node_fa.idx)] = new_h[0]
                 node_fa.neighbors.append(node_x)
                 stack.pop()

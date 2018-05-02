@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
+#from torch.autograd import Variable
 
 import math, random, sys
 from optparse import OptionParser
@@ -39,7 +39,7 @@ depth = int(opts.depth)
 beta = float(opts.beta)
 lr = float(opts.lr)
 
-model = JTPropVAE(vocab, hidden_size, latent_size, depth).to(device)
+model = JTPropVAE(vocab, hidden_size, latent_size, depth).to('cpu')
 
 if opts.model_path is not None:
     model.load_state_dict(torch.load(opts.model_path))
@@ -50,7 +50,7 @@ else:
         else:
             nn.init.xavier_normal_(param)
 if torch.cuda.is_available():
-    model = model.cuda()
+    model = model.to('cpu')
 print "Model #Params: %dK" % (sum([x.nelement() for x in model.parameters()]) / 1000,)
 
 optimizer = optim.Adam(model.parameters(), lr=lr)

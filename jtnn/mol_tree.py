@@ -154,7 +154,7 @@ if __name__ == "__main__":
             break
     manager = Manager()
     matrix = manager.list()
-    pool = multiprocessing.Pool(processes=7)
+    pool = multiprocessing.Pool(processes=8)
     pool.map(partial(myfunc, matrix), S)
     t00=time.clock()
     print t00-t0

@@ -83,10 +83,11 @@ def mol2graph(mol_batch):
 
 class MPN(nn.Module):
 
-    def __init__(self, hidden_size, depth):
+    def __init__(self, hidden_size, depth, device):
         super(MPN, self).__init__()
         self.hidden_size = hidden_size
         self.depth = depth
+        self.device = device
 
         self.W_i = nn.Linear(ATOM_FDIM + BOND_FDIM, hidden_size, bias=False)
         self.W_h = nn.Linear(hidden_size, hidden_size, bias=False)
@@ -94,10 +95,10 @@ class MPN(nn.Module):
 
     def forward(self, mol_graph):
         fatoms,fbonds,agraph,bgraph,scope = mol_graph
-        fatoms = create_var(fatoms)
-        fbonds = create_var(fbonds)
-        agraph = create_var(agraph)
-        bgraph = create_var(bgraph)
+        fatoms = fatoms.to(self.device)
+        fbonds = fbonds.to(self.device)
+        agraph = agraph.to(self.device)
+        bgraph = bgraph.to(self.device)
 
         binput = self.W_i(fbonds)
         message = nn.ReLU()(binput)

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
+#from torch.autograd import Variable
 
 import math, random, sys
 from optparse import OptionParser
@@ -36,10 +36,9 @@ sim_cutoff = float(opts.cutoff)
 
 model = JTPropVAE(vocab, hidden_size, latent_size, depth)
 if torch.cuda.is_available():
-    model.load_state_dict(torch.load(opts.model_path))
+    model.load_state_dict(torch.load(opts.model_path),map_location='cpu'))
     print "cuda model"
-
-    model = model.cuda()
+    model = model.to('cpu')
 else:
     model.load_state_dict(torch.load(opts.model_path, map_location='cpu'))
 data = []

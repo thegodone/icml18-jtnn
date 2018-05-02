@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
+#from torch.autograd import Variable
 
 import math, random, sys
 from optparse import OptionParser
@@ -34,9 +34,9 @@ hidden_size = int(opts.hidden_size)
 latent_size = int(opts.latent_size)
 depth = int(opts.depth)
 
-model = JTPropVAE(vocab, hidden_size, latent_size, depth).to(device)
+model = JTPropVAE(vocab, hidden_size, latent_size, depth).to('cpu')
 if torch.cuda.is_available():
-    model = model.cuda()
+    model = model.to('cpu')
 
 for param in model.parameters():
     if param.dim() == 1:
